@@ -1,6 +1,5 @@
 import sys
 import random
-import logging
 import pandas as pd
 from tabulate import tabulate
 import copy
@@ -53,14 +52,14 @@ class GeneticAlgorithm:
                     minV, maxV = min(num), max(num)
                     self.elements[k] = {'_range': v, '_type': 'Continous', '_generator': self.randomCont(minV, maxV)}
                 except:
-                    logging.error(f'Invalid Range: Please check the range of the element: {k}')
+                    print(f'Invalid Range: Please check the range of the element: {k}')
                     sys.exit()
             ### 離散型類型變數
             elif ',' in v:
                 try:
                     self.elements[k] = {'_range': v, '_type': 'Discrete', '_generator': self.randomDiscrete(v.split(','))}
                 except:
-                    logging.error(f'Invalid Range: Please check the range of the element: {k}')
+                    print(f'Invalid Range: Please check the range of the element: {k}')
                     sys.exit()
             ### 離散型連續變數
             elif '...' in v:
@@ -69,28 +68,28 @@ class GeneticAlgorithm:
                     minV, maxV = min(num), max(num)
                     self.elements[k] = {'_range': v, '_type': 'RandInt', '_generator': self.randomInt(minV, maxV)}
                 except:
-                    logging.error(f'Invalid Range: Please check the range of the element: {k}')
+                    print(f'Invalid Range: Please check the range of the element: {k}')
                     sys.exit()
         # self.elements = {k: self.elements[k] for k in sorted(self.elements.keys())}
 
     def remove_Elements(self, element):
         try:
             del self.elements[element]
-            logging.info(f'Element: {element} is removed!')
+            print(f'Element: {element} is removed!')
         except:
-            logging.info(f'Cannot find the element: {element}!')
+            print(f'Cannot find the element: {element}!')
 
     def show_Elements(self):
-        logging.info(f'Module: Genetic Algorithm')
-        logging.info(f'Element Number:　{len(self.elements.keys())}')
+        print(f'Module: Genetic Algorithm')
+        print(f'Element Number:　{len(self.elements.keys())}')
         df = pd.DataFrame(self.elements).T
         df = df.drop(['_generator'], axis=1)
-        logging.info(f'\n{tabulate(df, headers="keys", tablefmt="fancy_grid")}')
+        print(f'\n{tabulate(df, headers="keys", tablefmt="fancy_grid")}')
 
     def Init_Population(self):
         self.chromosome = {index: {'chromosome': dict(), 'fitness': 0} for index in range(self.population)}
         if len(self.elements.keys()) == 0:
-            logging.error('Please add some elements first!!')
+            print('Please add some elements first!!')
             sys.exit()
 
         for index in range(self.population):
@@ -104,7 +103,7 @@ class GeneticAlgorithm:
 
     def set_fitness(self, fitness):
         self.fitness = fitness
-        logging.info('Fitness function is ready.')
+        print('Fitness function is ready.')
 
     def calc_fitness(self):
         for key, value in self.chromosome.items():
@@ -113,7 +112,7 @@ class GeneticAlgorithm:
     def show_Population(self, num= 10):
         if num > self.population or num <= 0:
             num = self.population
-        logging.info('Current Population')
+        print('Current Population')
         title = f"{'Num':^5s}|{'|'.join([i.center(15) for i in self.elements.keys()])}|{' fitness':^15s}"
         print(title)
         print('-'*len(title))
@@ -132,7 +131,7 @@ class GeneticAlgorithm:
         if self.best_chromosome['fitness'] <= self.chromosome[0]['fitness']:
             self.best_chromosome = copy.deepcopy(self.chromosome[0])
         self.best_chromosome['iteration'] = self.current
-        logging.info(f'Global Optimal: {self.best_chromosome}')
+        print(f'Global Optimal: {self.best_chromosome}')
         index = 0
         while len(self.elite) < self.population * self.eliteRate:
             self.elite.append(self.chromosome[index])
@@ -174,15 +173,6 @@ class GeneticAlgorithm:
         return self.best_chromosome
 
 if __name__ == "__main__":
-    ### Log level
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    # console_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(module)s - %(message)s'))
-    console_handler.setFormatter(logging.Formatter('[%(levelname)s] %(message)s'))
-    logger.addHandler(console_handler)
-
     a = GeneticAlgorithm()
     ## 加基因參數, a 為 0-1 之間連續數, b 為 x, y, z (離散型類型變數), c 為 0, 1, 2, ..., 10 (離散型連續變數)
     a.add_Elements(a='1-0', b='x,y,z', c='0...10')
